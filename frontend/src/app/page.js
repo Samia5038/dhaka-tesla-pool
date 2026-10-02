@@ -1,69 +1,122 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import Shell from '@/components/Shell';
+import Alert from '@/components/Alert';
+import { api } from '@/lib/api';
+import { loadSession, saveSession } from '@/lib/session';
+
+const DEMO = [
+  { name: 'Nusrat', role: 'Passenger', email: 'nusrat@teslapool.test' },
+  { name: 'Rafiq', role: 'Passenger', email: 'rafiq@teslapool.test' },
+  { name: 'Shirin', role: 'Passenger', email: 'shirin@teslapool.test' },
+  { name: 'Jashim', role: 'Driver (Bullet)', email: 'jashim@teslapool.test' },
+];
+
+function homeFor(user) {
+  return user.role === 'DRIVER' ? '/driver' : '/passenger';
+}
 
 export default function Home() {
+  const router = useRouter();
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const s = loadSession();
+    if (s) router.replace(homeFor(s.user));
+  }, [router]);
+
+  async function authenticate(path, body) {
+    setError('');
+    setLoading(true);
+    try {
+      const data = await api(`/auth/${path}`, { method: 'POST', body });
+      saveSession(data);
+      router.replace(homeFor(data.user));
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  }
+
+  function submit(e) {
+    e.preventDefault();
+    if (mode === 'signup') authenticate('signup', form);
+    else authenticate('login', { email: form.email, password: form.password });
+  }
+
+  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
+    <Shell>
+      <div className="mx-auto mt-6 grid max-w-4xl items-center gap-10 md:grid-cols-2">
+        <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.6 }}>
+          <h1 className="text-5xl font-bold leading-tight">
+            Share a seat.
+            <br />
+            <span className="text-gradient">Split the fare.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <p className="mt-4 text-slate-400">Pool a Tesla across Dhaka. Pay less, ride together, skip the awkward small talk.</p>
+
+          <p className="mb-3 mt-8 text-xs uppercase tracking-wide text-slate-500">Quick demo login (password: password123)</p>
+          <div className="grid grid-cols-2 gap-3">
+            {DEMO.map((d) => (
+              <motion.button
+                key={d.email}
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.96 }}
+                disabled={loading}
+                onClick={() => authenticate('login', { email: d.email, password: 'password123' })}
+                className="glass rounded-2xl px-4 py-3 text-left disabled:opacity-50"
+              >
+                <p className="font-semibold">{d.name}</p>
+                <p className="text-xs text-slate-400">{d.role}</p>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }} className="glass rounded-3xl p-6">
+          <div className="mb-5 flex rounded-full bg-white/5 p-1">
+            {['login', 'signup'].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => { setMode(m); setError(''); }}
+                className="relative flex-1 rounded-full py-2 text-sm font-semibold"
+              >
+                {mode === m && (
+                  <motion.span layoutId="tab" className="absolute inset-0 rounded-full bg-white/10" transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+                )}
+                <span className="relative">{m === 'login' ? 'Sign in' : 'Sign up'}</span>
+              </button>
+            ))}
+          </div>
+
+          <Alert message={error} onClose={() => setError('')} />
+
+          <form onSubmit={submit} className="space-y-3">
+            <AnimatePresence initial={false}>
+              {mode === 'signup' && (
+                <motion.div key="name" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <input className="input" placeholder="Your name" value={form.name} onChange={set('name')} required />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <input className="input" type="email" placeholder="Email" value={form.email} onChange={set('email')} required />
+            <input className="input" type="password" placeholder="Password (min 6 characters)" value={form.password} onChange={set('password')} required />
+            <button className="btn btn-primary w-full" disabled={loading}>
+              {loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create passenger account'}
+            </button>
+          </form>
+          <p className="mt-4 text-center text-xs text-slate-500">Sign up creates a passenger account. Drivers are added by the admin.</p>
+        </motion.div>
+      </div>
+    </Shell>
   );
 }
