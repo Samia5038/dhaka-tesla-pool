@@ -6,8 +6,9 @@
   "scripts": {
     "test": "jest --runInBand",
     "dev": "nodemon src/server.js",
+    "seed": "node prisma/seed.js",
     "start": "node src/server.js",
-    "seed": "node prisma/seed.js"
+  "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
