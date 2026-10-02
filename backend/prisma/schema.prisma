@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PASSENGER
+  DRIVER
+}
+
+enum PoolStatus {
+  OPEN
+  DRIVER_ARRIVED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+enum RideStatus {
+  REQUESTED
+  MATCHED
+  DRIVER_ARRIVED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  vehicle      Vehicle?
+  rides        RideRequest[]
+  history      RideStatusHistory[]
+}
+
+model Vehicle {
+  id       Int     @id @default(autoincrement())
+  name     String
+  capacity Int
+  isOnline Boolean @default(false)
+  driverId Int     @unique
+  driver   User    @relation(fields: [driverId], references: [id])
+
+  pools    Pool[]
+}
+
+model Pool {
+  id         Int        @id @default(autoincrement())
+  vehicleId  Int
+  vehicle    Vehicle    @relation(fields: [vehicleId], references: [id])
+  pickupZone String
+  status     PoolStatus @default(OPEN)
+  createdAt  DateTime   @default(now())
+
+  rides      RideRequest[]
+
+  @@index([vehicleId, status])
+}
+
+model RideRequest {
+  id              Int        @id @default(autoincrement())
+  passengerId     Int
+  passenger       User       @relation(fields: [passengerId], references: [id])
+  poolId          Int?
+  pool            Pool?      @relation(fields: [poolId], references: [id])
+  pickupZone      String
+  destinationZone String
+  seats            Int
+  farePaisa       Int?
+  status          RideStatus @default(REQUESTED)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  history         RideStatusHistory[]
+
+  @@index([passengerId])
+  @@index([poolId])
+  @@index([status, pickupZone])
+}
+
+model RideStatusHistory {
+  id            Int         @id @default(autoincrement())
+  rideRequestId Int
+  rideRequest   RideRequest @relation(fields: [rideRequestId], references: [id])
+  fromStatus    RideStatus?
+  toStatus      RideStatus
+  changedById   Int
+  changedBy     User        @relation(fields: [changedById], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@index([rideRequestId])
+}
