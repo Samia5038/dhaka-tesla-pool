@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const prisma = require('./db');
+const authRoutes = require('./routes/auth');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -15,5 +17,10 @@ app.get('/health', async (req, res) => {
     res.status(500).json({ status: 'error', db: 'down' });
   }
 });
+
+app.use('/api/auth', authRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
