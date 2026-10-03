@@ -4,7 +4,7 @@ Share a seat. Split the fare. Survive Dhaka traffic.
 
 | Live app | API | Demo video | Version |
 |---|---|---|---|
-| [dhaka-tesla-pool-ochre.vercel.app](https://dhaka-tesla-pool-ochre.vercel.app) | REPLACE_WITH_API_URL | REPLACE_WITH_VIDEO_LINK | `release/v1.0.0` |
+| [dhaka-tesla-pool-ochre.vercel.app](https://dhaka-tesla-pool-ochre.vercel.app) | REPLACE_WITH_VIDEO_LINK | `release/v1.0.0` |
 
 A ride-pooling MVP for Dhaka. Passengers request a ride, and when it makes sense they share a three-seat Tesla (Jashim's "Bullet") with someone else. Each passenger sees only their own fare and status, the driver sees who is riding and what stage the trip is at, and Bullet's seat capacity can never be exceeded, even when two people grab the last seat at the same instant.
 
