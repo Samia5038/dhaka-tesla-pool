@@ -204,4 +204,4 @@ Long-lived branches `master`, `pre-release`, `release/v1.0.0`; features on `feat
 
 ## Demo video
 
-REPLACE_WITH_VIDEO_LINK (6 minutes: problem and idea, architecture and decisions, product tour).
+[VIDEO_LINK](https://drive.google.com/file/d/1kUfESbmlWcB5HJsJV6_uwM-6lqwvPdBz/view?usp=sharing)
