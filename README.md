@@ -24,7 +24,7 @@ A ride-pooling MVP for Dhaka. Passengers request a ride, and when it makes sense
 
 | Login | Passenger | Driver |
 |---|---|---|
-| ![login](docs/screenshots/login.png) | ![passenger](docs/screenshots/passenger.png) | ![driver](docs/screenshots/driver.png) |
+| ![login](Login.png) | ![passenger](Passenger.png) | ![driver](Driver.png) |
 
 ## Architecture
 
